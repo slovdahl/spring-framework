@@ -160,6 +160,8 @@ public abstract class AbstractSockJsIntegrationTests {
 
 	protected abstract AbstractXhrTransport createXhrTransport();
 
+	protected abstract AbstractEventSourceTransport createEventSourceTransport();
+
 	protected void initSockJsClient(Transport... transports) {
 		this.sockJsClient = new SockJsClient(Arrays.asList(transports));
 		this.sockJsClient.start();
@@ -182,6 +184,11 @@ public abstract class AbstractSockJsIntegrationTests {
 		testEcho(100, xhrTransport, null);
 	}
 
+	@Test
+	public void echoEventSource() throws Exception {
+		testEcho(100, createEventSourceTransport(), null);
+	}
+
 	// SPR-13254
 
 	@Test
@@ -192,6 +199,20 @@ public abstract class AbstractSockJsIntegrationTests {
 		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
 		headers.add("auth", "123");
 		testEcho(10, xhrTransport, headers);
+
+		for (Map.Entry<String, HttpHeaders> entry : this.testFilter.requests.entrySet()) {
+			HttpHeaders httpHeaders = entry.getValue();
+			assertEquals("No auth header for: " + entry.getKey(), "123", httpHeaders.getFirst("auth"));
+		}
+	}
+
+	@Test
+	public void echoEventSourceWithHeaders() throws Exception {
+		AbstractEventSourceTransport eventSourceTransport = createEventSourceTransport();
+
+		WebSocketHttpHeaders headers = new WebSocketHttpHeaders();
+		headers.add("auth", "123");
+		testEcho(10, eventSourceTransport, headers);
 
 		for (Map.Entry<String, HttpHeaders> entry : this.testFilter.requests.entrySet()) {
 			HttpHeaders httpHeaders = entry.getValue();
@@ -214,6 +235,11 @@ public abstract class AbstractSockJsIntegrationTests {
 		AbstractXhrTransport xhrTransport = createXhrTransport();
 		xhrTransport.setXhrStreamingDisabled(true);
 		testReceiveOneMessage(xhrTransport, null);
+	}
+
+	@Test
+	public void receiveOneMessageEventSource() throws Exception {
+		testReceiveOneMessage(createEventSourceTransport(), null);
 	}
 
 	@Test
