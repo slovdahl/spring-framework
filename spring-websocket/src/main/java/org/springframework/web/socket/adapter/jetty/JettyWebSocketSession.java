@@ -270,12 +270,12 @@ public class JettyWebSocketSession extends AbstractWebSocketSession<Session> {
 
 	@Override
 	protected void sendTextMessage(TextMessage message) throws IOException {
-		getRemoteEndpoint().sendString(message.getPayload());
+		getRemoteEndpoint().sendString(message.getPayload(), null);
 	}
 
 	@Override
 	protected void sendBinaryMessage(BinaryMessage message) throws IOException {
-		getRemoteEndpoint().sendBytes(message.getPayload());
+		getRemoteEndpoint().sendBytes(message.getPayload(), null);
 	}
 
 	@Override
