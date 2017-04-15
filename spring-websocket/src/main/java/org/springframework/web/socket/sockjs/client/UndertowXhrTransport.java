@@ -267,8 +267,8 @@ public class UndertowXhrTransport extends AbstractXhrTransport {
 	}
 
 	@Override
-	protected ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
-		return executeRequest(url, Methods.POST, headers, message.getPayload());
+	protected void executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		executeRequest(url, Methods.POST, headers, message.getPayload());
 	}
 
 	protected ResponseEntity<String> executeRequest(URI url, HttpString method, HttpHeaders headers, String body) {

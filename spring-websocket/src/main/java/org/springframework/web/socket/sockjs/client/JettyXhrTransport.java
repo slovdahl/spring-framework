@@ -25,6 +25,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.client.api.Response;
+import org.eclipse.jetty.client.api.Result;
 import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.http.HttpFields;
 import org.eclipse.jetty.http.HttpMethod;
@@ -126,32 +127,41 @@ public class JettyXhrTransport extends AbstractXhrTransport implements Lifecycle
 
 	@Override
 	protected ResponseEntity<String> executeInfoRequestInternal(URI infoUrl, HttpHeaders headers) {
-		return executeRequest(infoUrl, HttpMethod.GET, headers, null);
-	}
-
-	@Override
-	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
-		return executeRequest(url, HttpMethod.POST, headers, message.getPayload());
-	}
-
-	protected ResponseEntity<String> executeRequest(URI url, HttpMethod method, HttpHeaders headers, String body) {
-		Request httpRequest = this.httpClient.newRequest(url).method(method);
+		Request httpRequest = this.httpClient.newRequest(infoUrl).method(HttpMethod.GET);
 		addHttpHeaders(httpRequest, headers);
-		if (body != null) {
-			httpRequest.content(new StringContentProvider(body));
-		}
+
 		ContentResponse response;
 		try {
 			response = httpRequest.send();
 		}
 		catch (Exception ex) {
-			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
+			throw new SockJsTransportFailureException("Failed to execute request to " + infoUrl, ex);
 		}
 		HttpStatus status = HttpStatus.valueOf(response.getStatus());
 		HttpHeaders responseHeaders = toHttpHeaders(response.getHeaders());
 		return (response.getContent() != null ?
 			new ResponseEntity<String>(response.getContentAsString(), responseHeaders, status) :
 			new ResponseEntity<String>(responseHeaders, status));
+	}
+
+	@Override
+	public void executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		String body = message.getPayload();
+		Request httpRequest = this.httpClient.newRequest(url).method(HttpMethod.POST);
+		addHttpHeaders(httpRequest, headers);
+		if (body != null) {
+			httpRequest.content(new StringContentProvider(body));
+		}
+		try {
+			httpRequest.send(new Response.CompleteListener() {
+				@Override
+				public void onComplete(Result result) {
+				}
+			});
+		}
+		catch (Exception ex) {
+			throw new SockJsTransportFailureException("Failed to execute request to " + url, ex);
+		}
 	}
 
 

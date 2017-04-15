@@ -134,7 +134,7 @@ public class XhrTransportTests {
 		}
 
 		@Override
-		protected ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+		protected void executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
 			this.actualSendRequestHeaders = headers;
 			return this.sendMessageResponseToReturn;
 		}

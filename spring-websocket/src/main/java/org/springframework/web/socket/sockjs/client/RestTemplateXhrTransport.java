@@ -139,9 +139,9 @@ public class RestTemplateXhrTransport extends AbstractXhrTransport {
 	}
 
 	@Override
-	public ResponseEntity<String> executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
+	public void executeSendRequestInternal(URI url, HttpHeaders headers, TextMessage message) {
 		RequestCallback requestCallback = new XhrRequestCallback(headers, message.getPayload());
-		return this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
+		this.restTemplate.execute(url, HttpMethod.POST, requestCallback, textResponseExtractor);
 	}
 
 

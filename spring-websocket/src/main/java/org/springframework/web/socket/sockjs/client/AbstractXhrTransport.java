@@ -173,19 +173,18 @@ public abstract class AbstractXhrTransport implements XhrTransport {
 		if (logger.isTraceEnabled()) {
 			logger.trace("Starting XHR send, url=" + url);
 		}
-		ResponseEntity<String> response = executeSendRequestInternal(url, headers, message);
-		if (response.getStatusCode() != HttpStatus.NO_CONTENT) {
-			if (logger.isErrorEnabled()) {
-				logger.error("XHR send request (url=" + url + ") failed: " + response);
-			}
-			throw new HttpServerErrorException(response.getStatusCode());
+		try {
+			executeSendRequestInternal(url, headers, message);
 		}
-		if (logger.isTraceEnabled()) {
-			logger.trace("XHR send request (url=" + url + ") response: " + response);
+		catch (Throwable t) {
+			if (logger.isErrorEnabled()) {
+				logger.error("XHR send request (url=" + url + ") failed: " + t.getMessage());
+			}
+			throw new HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
-	protected abstract ResponseEntity<String> executeSendRequestInternal(
+	protected abstract void executeSendRequestInternal(
 			URI url, HttpHeaders headers, TextMessage message);
 
 
